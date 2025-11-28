@@ -1,15 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// STRICTLY using your requested model strings
+export type ModelType = 'models/gemini-flash-latest' | 'models/gemini-2.5-pro';
+
 interface AppState {
   isSidebarCollapsed: boolean;
-  privacyMode: boolean; // If true, tells backend NOT to log data
-  themeMode: 'dark' | 'light' | 'system';
+  privacyMode: boolean;
+  selectedModel: ModelType;
 
-  // Actions
   toggleSidebar: () => void;
   setPrivacyMode: (enabled: boolean) => void;
-  setThemeMode: (mode: 'dark' | 'light' | 'system') => void;
+  setSelectedModel: (model: ModelType) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -17,19 +19,12 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       isSidebarCollapsed: false,
       privacyMode: false,
-      themeMode: 'system',
+      selectedModel: 'models/gemini-flash-latest', // Default
 
-      toggleSidebar: () => 
-        set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
-
-      setPrivacyMode: (enabled) => 
-        set({ privacyMode: enabled }),
-
-      setThemeMode: (mode) => 
-        set({ themeMode: mode }),
+      toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
+      setPrivacyMode: (enabled) => set({ privacyMode: enabled }),
+      setSelectedModel: (model) => set({ selectedModel: model }),
     }),
-    {
-      name: 'forensic-ui-prefs',
-    }
+    { name: 'forensic-ui-prefs' }
   )
 );

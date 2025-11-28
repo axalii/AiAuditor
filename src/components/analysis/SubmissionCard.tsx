@@ -3,25 +3,31 @@ import { motion } from 'framer-motion';
 import { Trash2, Edit2, Save, X, Microscope } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Stores
 import { useDataStore } from '../../store/useDataStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useAppStore } from '../../store/useAppStore'; // Added this
+
+// API & Types
 import { analyzeSubmission, getErrorMessage } from '../../lib/api';
 import { Submission } from '../../types';
 
+// UI Components
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-// Removed unused Skeleton import
 import { ScoreMeter } from './ScoreMeter';
 import { ReasoningDisplay } from './ReasoningDisplay';
 import { DuplicateWarning } from './DuplicateWarning';
-import { cn } from '../ui/utils'; // Added missing import
+import { cn } from '../ui/utils';
 
 interface SubmissionCardProps {
   submission: Submission;
 }
 
 export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
+  // 1. Get Stores
   const { sessionToken } = useAuthStore();
+  const { selectedModel } = useAppStore(); // Get the currently selected model (Flash/Pro)
   const { 
     updateSubmission, 
     removeSubmission, 
@@ -30,14 +36,17 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
     assignmentContext 
   } = useDataStore();
 
+  // 2. Local State
   const [isEditing, setIsEditing] = useState(submission.content.length === 0);
   const [localContent, setLocalContent] = useState(submission.content);
   const [localName, setLocalName] = useState(submission.studentName);
 
+  // Sync local state if store changes externally
   useEffect(() => {
     setLocalContent(submission.content);
   }, [submission.content]);
 
+  // 3. Logic
   const handleAnalyze = async () => {
     if (!sessionToken) {
       toast.error('Session Expired', { description: 'Please re-authenticate.' });
@@ -51,9 +60,14 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
     setSubmissionStatus(submission.id, 'analyzing');
 
     try {
-      const result = await analyzeSubmission(localContent, assignmentContext, sessionToken);
+      // Pass 'selectedModel' to the API here
+      const result = await analyzeSubmission(
+        localContent, 
+        assignmentContext, 
+        sessionToken, 
+        selectedModel
+      );
       
-      // FIX: Add the missing timestamp here
       setSubmissionResult(submission.id, {
         ...result,
         timestamp: new Date().toISOString()
@@ -71,12 +85,13 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
     updateSubmission(submission.id, { 
       content: localContent, 
       studentName: localName,
-      status: 'idle',
+      status: 'idle', // Reset status on edit so they can re-analyze
       result: null 
     });
     setIsEditing(false);
   };
 
+  // 4. Render
   return (
     <motion.div
       layout
@@ -85,6 +100,7 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
       exit={{ opacity: 0, scale: 0.95 }}
       className="group relative rounded-xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-sm transition-all hover:border-slate-700 hover:shadow-lg"
     >
+      {/* --- Header --- */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {isEditing ? (
@@ -98,6 +114,7 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
             <h3 className="text-lg font-bold text-slate-100">{submission.studentName}</h3>
           )}
           
+          {/* Status Badges */}
           {!isEditing && submission.status === 'done' && submission.result && (
             <div className="flex gap-2">
               <Badge variant={submission.result.aiScore > 50 ? 'danger' : 'success'}>
@@ -108,6 +125,7 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
           )}
         </div>
 
+        {/* Edit/Delete Actions */}
         <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
           {isEditing ? (
             <>
@@ -123,6 +141,7 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
         </div>
       </div>
 
+      {/* --- Content Area --- */}
       <div className="relative min-h-[120px]">
         {isEditing ? (
           <textarea
@@ -133,6 +152,7 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
           />
         ) : (
           <div className="relative">
+            {/* Text Preview */}
             <div className={cn(
               "p-4 rounded-md bg-slate-950/30 border border-slate-800/50 text-sm text-slate-300 font-serif leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto",
               submission.status === 'analyzing' && "opacity-50 blur-[1px]"
@@ -140,6 +160,7 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
               {submission.content || <span className="text-slate-600 italic">No content provided.</span>}
             </div>
 
+            {/* Loading Overlay */}
             {submission.status === 'analyzing' && (
               <div className="absolute inset-0 flex items-center justify-center z-10">
                 <div className="flex flex-col items-center gap-3">
@@ -155,6 +176,7 @@ export const SubmissionCard = ({ submission }: SubmissionCardProps) => {
         )}
       </div>
 
+      {/* --- Footer / Results --- */}
       {!isEditing && (
         <div className="mt-6 flex flex-col gap-4">
           {submission.status === 'idle' && (

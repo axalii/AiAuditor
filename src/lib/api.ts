@@ -36,17 +36,19 @@ export const verifyPin = async (pin: string): Promise<AuthResponse> => {
 
 /**
  * Sends text to the Vercel API for analysis.
+ * Now accepts 'model' to switch between Flash and Pro.
  */
 export const analyzeSubmission = async (
   text: string, 
   context: string, 
-  token: string
+  token: string,
+  model: string
 ): Promise<AnalysisResponse> => {
   
   const response = await fetch('/api/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, context, token }),
+    body: JSON.stringify({ text, context, token, model }),
   });
 
   const data = await response.json();
