@@ -48,7 +48,7 @@ export default async function handler(req: Request) {
       "${text.substring(0, 5000)}"
     `;
 
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -73,14 +73,14 @@ export default async function handler(req: Request) {
     // We use event.waitUntil if available, or just await it
     await client.sql`
       INSERT INTO analysis_logs (content_hash, ai_score, model_used)
-      VALUES (${contentHash}, ${result.ai_score}, 'gemini-1.5-flash');
+      VALUES (${contentHash}, ${result.ai_score}, 'gemini-2.5-flash');
     `;
 
     return new Response(JSON.stringify({
       ai_score: result.ai_score,
       reasoning: result.reasoning,
       is_duplicate: existing.length > 0,
-      model: 'gemini-1.5-flash'
+      model: 'gemini-2.5-flash'
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
