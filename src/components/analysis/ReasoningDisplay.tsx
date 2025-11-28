@@ -1,8 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import { motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from '../ui/utils';
 
 interface ReasoningDisplayProps {
   markdown: string;
@@ -33,11 +32,9 @@ export const ReasoningDisplay = ({ markdown }: ReasoningDisplayProps) => {
         <div className="p-4 text-sm leading-relaxed text-slate-300">
           <ReactMarkdown
             components={{
-              // Highlighter effect for bold text
               strong: ({ node, ...props }) => (
                 <span className="bg-yellow-500/20 text-yellow-200 px-1 rounded font-semibold border-b border-yellow-500/40" {...props} />
               ),
-              // Custom bullet points
               ul: ({ node, ...props }) => <ul className="space-y-2 my-2" {...props} />,
               li: ({ node, ...props }) => (
                 <li className="flex items-start gap-2">
