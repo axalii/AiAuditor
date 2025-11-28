@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from './store/useAuthStore';
 import { useDataStore } from './store/useDataStore';
-import { checkConnection } from './lib/supabase';
 
 // Components
 import { PinTerminal } from './components/auth/PinTerminal';
@@ -18,12 +16,6 @@ import { generateId } from './lib/crypto';
 function App() {
   const { isAuthenticated } = useAuthStore();
   const { submissions, addSubmission } = useDataStore();
-  const [isOnline, setIsOnline] = useState(true);
-
-  // Check backend health on mount
-  useEffect(() => {
-    checkConnection().then(setIsOnline);
-  }, []);
 
   // Empty State Helper
   const EmptyState = () => (
@@ -56,12 +48,6 @@ function App() {
     <>
       <Toaster />
       
-      {!isOnline && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-rose-600 text-white text-xs font-bold text-center py-1">
-          SYSTEM OFFLINE: Backend connection lost. Functionality limited.
-        </div>
-      )}
-
       <AnimatePresence mode="wait">
         {!isAuthenticated ? (
           <motion.div

@@ -11,7 +11,7 @@ export const Sidebar = () => {
   const { logout, userLabel } = useAuthStore();
   const { assignmentContext, setContext } = useDataStore();
 
-  if (isSidebarCollapsed) return null; // Or render a mini-sidebar
+  if (isSidebarCollapsed) return null;
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-80 border-r border-slate-800 bg-slate-900/95 backdrop-blur-md flex flex-col transition-all duration-300">
@@ -73,8 +73,8 @@ export const Sidebar = () => {
       <div className="border-t border-slate-800 p-4 bg-slate-900">
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-slate-300">{userLabel}</span>
-            <span className="text-[10px] text-slate-500">Authorized Personnel</span>
+            <span className="text-xs font-medium text-slate-300">{userLabel || 'Authorized User'}</span>
+            <span className="text-[10px] text-slate-500">Secure Connection</span>
           </div>
           <StatusLight status="online" />
         </div>
